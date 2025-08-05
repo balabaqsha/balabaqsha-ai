@@ -1,14 +1,15 @@
 
-
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import JSONResponse
-from google.cloud import documentai_v1 as documentai
 import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/bekabigeldigmail.com/PycharmProjects/Data-Extraction-from-Invoice-Images/new_edited/key.json"
+print("GOOGLE_APPLICATION_CREDENTIALS:", os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"))
+
 import json
 from datetime import datetime
 import uvicorn
+from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import JSONResponse
+from google.cloud import documentai_v1 as documentai
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "key.json"
 
 project_id = "focused-veld-466306-k2"
 location = "us"
@@ -25,6 +26,7 @@ async def parse_invoice(file: UploadFile = File(...)):
 
         file_content = await file.read()
         raw_document = documentai.RawDocument(content=file_content, mime_type=file.content_type)
+
         request = documentai.ProcessRequest(name=name, raw_document=raw_document)
         result = client.process_document(request=request)
         document = result.document
@@ -108,3 +110,51 @@ async def parse_invoice(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+# print("GOOGLE_APPLICATION_CREDENTIALS:", os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"))
+
+# import os
+# # ✅ Убедись, что путь правильный и без пробелов
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/bekabigeldigmail.com/PycharmProjects/Data-Extraction-from-Invoice-Images/new_edited/key.json"
+# print("GOOGLE_APPLICATION_CREDENTIALS:", os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"))
+#
+# import json
+# from datetime import datetime
+# import uvicorn
+# from fastapi import FastAPI, UploadFile, File
+# from fastapi.responses import JSONResponse
+# from google.cloud import documentai_v1 as documentai
+#
+# project_id = "focused-veld-466306-k2"
+# location = "us"
+# processor_id = "b3a6b671d72f41ba"
+#
+# app = FastAPI(title="Document AI Form Parser with Table Extraction")
+#
+# @app.post("/ocr/")
+# async def parse_invoice(file: UploadFile = File(...)):
+#     try:
+#         client = documentai.DocumentProcessorServiceClient()
+#         name = f"projects/{project_id}/locations/{location}/processors/{processor_id}"
+#
+#         file_content = await file.read()
+#         raw_document = documentai.RawDocument(content=file_content, mime_type=file.content_type)
+#         request = documentai.ProcessRequest(name=name, raw_document=raw_document)
+#         result = client.process_document(request=request)
+#         document = result.document
+#
+#         full_text = document.text
+#
+#         output = {
+#             "file_name": file.filename,
+#             "uploaded_at": datetime.utcnow().isoformat(),
+#             "text": full_text
+#         }
+#
+#         return JSONResponse(content=output)
+#
+#     except Exception as e:
+#         return JSONResponse(status_code=500, content={"error": str(e)})
+#
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
